@@ -4,12 +4,3 @@
   flex-direction: column;
   align-items: center;
 }
-
-.filterInput {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: 200px;
-  height: 25px;
-  padding-left: 10px;
-  padding-right: 10px;
-}

@@ -1,57 +1,88 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-import {
-  deleteContactAction,
-  fetchContactAction,
-} from 'store/user/userService';
+import { deleteContactThunk, fetchContactThunk } from 'store/user/userService';
 import { selectError, selectIsLoading } from 'store/user/selectors';
 import { selectFilteredUSers } from 'store/selectors';
 
-import Notiflix from 'notiflix';
 import css from './ContactList.module.css';
+import Modal from 'components/Modal/Modal';
 
 const ContactList = () => {
   const contacts = useSelector(selectFilteredUSers);
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
 
+  //-------------------Modal----------------------
+  const [isShowModal, setIsShowModal] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
+
+  const handleOpen = id => {
+    const selectedContact = contacts.find(el => el.id === id);
+    setSelectedContact(selectedContact);
+    setIsShowModal(true);
+  };
+
+  const handleClose = () => {
+    setIsShowModal(false);
+  };
+  //----------------------------------------------
+
   const dispatch = useDispatch();
 
   const deletingContact = id => {
-    const deletedContact = contacts.find(el => el.id === id);
-    dispatch(deleteContactAction(id));
-    Notiflix.Notify.info(`${deletedContact.name} was deleted!`);
+    dispatch(deleteContactThunk(id));
   };
 
   useEffect(() => {
-    dispatch(fetchContactAction());
+    dispatch(fetchContactThunk());
   }, [dispatch]);
 
   return (
-    <ul>
-      {error && (
-        <p style={{ color: 'red', fontSize: '25px', textAlign: 'center' }}>
-          {error}! Please try again later
-        </p>
-      )}
+    <>
       {isLoading && !error && <p>Loading...</p>}
-      {contacts
-        .sort((a, b) => b.id - a.id)
-        .map(el => (
-          <li className={css.item} key={el.id}>
-            <p>
-              {el.name}: {el.phone}
-            </p>
-            <button
-              onClick={() => deletingContact(el.id)}
-              className={css.deleteBtn}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-    </ul>
+      {contacts && contacts.length > 0 && (
+        <div className={css.wrap}>
+          <table className={css.table}>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {contacts
+                .sort((a, b) => b.id - a.id)
+                .map(el => (
+                  <tr key={el.id} className={css.trList}>
+                    <td>{el.name}</td>
+                    <td>{el.number}</td>
+                    <td className={css.tdButtons}>
+                      <button
+                        type="button"
+                        onClick={() => handleOpen(el.id)}
+                        className={css.deleteBtn}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deletingContact(el.id)}
+                        className={css.deleteBtn}
+                      >
+                        Delete
+                      </button>
+                      {isShowModal && (
+                        <Modal close={handleClose} contact={selectedContact} />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
   );
 };
 

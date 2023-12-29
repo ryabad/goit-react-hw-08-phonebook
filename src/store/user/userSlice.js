@@ -1,9 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { initialState } from './initialState';
 import {
-  addContactAction,
-  deleteContactAction,
-  fetchContactAction,
+  addContactThunk,
+  changeContactThunk,
+  deleteContactThunk,
+  fetchContactThunk,
 } from './userService';
 
 const handlePending = state => {
@@ -25,17 +26,28 @@ export const userSlice = createSlice({
   initialState,
   extraReducers: builder => {
     builder
-      .addCase(fetchContactAction.fulfilled, (state, action) => {
+      .addCase(fetchContactThunk.fulfilled, (state, action) => {
         state.user = action.payload;
       })
-      .addCase(addContactAction.fulfilled, (state, action) => {
+      .addCase(addContactThunk.fulfilled, (state, action) => {
         state.user.push(action.payload);
       })
-      .addCase(deleteContactAction.fulfilled, (state, action) => {
+      .addCase(deleteContactThunk.fulfilled, (state, action) => {
         const index = state.user.findIndex(
           user => user.id === action.payload.id
         );
         state.user.splice(index, 1);
+      })
+      .addCase(changeContactThunk.fulfilled, (state, action) => {
+        const index = state.user.findIndex(
+          user => user.id === action.payload.id
+        );
+
+        state.user[index] = {
+          ...state.user[index],
+          name: action.payload.name,
+          number: action.payload.number,
+        };
       })
       .addMatcher(action => action.type.endsWith('pending'), handlePending)
       .addMatcher(action => action.type.endsWith('fulfilled'), handleFulfilled)

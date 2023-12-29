@@ -1,23 +1,20 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { selectContacts, selectError } from 'store/user/selectors';
-import { addContactAction } from 'store/user/userService';
+import { selectContacts } from 'store/user/selectors';
+import { addContactThunk } from 'store/user/userService';
 
 import { nanoid } from 'nanoid';
 
 import Notiflix from 'notiflix';
-import css from './ContactForm.module.css';
+
+import { Box, Button, TextField } from '@mui/material';
+import { checkName, checkPhone } from 'common/regExpCheck';
 
 const ContactForm = () => {
   const contacts = useSelector(selectContacts);
-  const error = useSelector(selectError);
 
   const dispatch = useDispatch();
 
   const addingContact = contact => {
-    if (error) {
-      return Notiflix.Notify.failure(`${error}. Please try again later!`);
-    }
-
     const isExist = contacts.some(el => el.name === contact.name);
     if (isExist) {
       Notiflix.Notify.failure(`${contact.name} is already in contacts`);
@@ -27,49 +24,77 @@ const ContactForm = () => {
       ...contact,
       id: nanoid(),
     };
-    dispatch(addContactAction(newContact));
-    Notiflix.Notify.success(`${newContact.name} has been added!`);
+    dispatch(addContactThunk(newContact));
   };
 
   const handleSubmit = e => {
-    const form = e.target;
-    const name = form.elements.name.value;
-    const phone = form.elements.phone.value;
     e.preventDefault();
-    addingContact({ name, phone });
+    const form = e.target;
+    const contact = {
+      name: form.elements.name.value,
+      number: form.elements.phone.value,
+    };
+    if (
+      checkName(contact.name) === false ||
+      checkPhone(contact.number) === false
+    ) {
+      Notiflix.Notify.warning('Input fields did not pass validation');
+      return;
+    }
+
+    addingContact(contact);
     form.reset();
   };
 
   return (
-    <form onSubmit={handleSubmit} className={css.form}>
-      <div>
-        <label htmlFor="inputName"></label>
-        <input
-          className={css.nameInput}
-          name="name"
-          type="text"
-          id="inputName"
-          required
-          pattern="^[a-zA-Zа-яА-Я]+(([' \-][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-          placeholder="Name"
-        />
-      </div>
-      <div>
-        <label htmlFor="inputPhone"></label>
-        <input
-          className={css.numberInput}
-          name="phone"
-          type="tel"
-          id="inputPhone"
-          required
-          pattern="\+?\d{1,4}?[ .\-\s]?\(?\d{1,3}?\)?[ .\-\s]?\d{1,4}[ .\-\s]?\d{1,4}[ .\-\s]?\d{1,9}"
-          placeholder="Phone"
-        />
-      </div>
-      <button type="submit" className={css.addContactBtn}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      noValidate
+      autoComplete="off"
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '15px',
+      }}
+    >
+      <TextField
+        required
+        sx={{
+          backgroundColor: 'white',
+          borderRadius: '10px',
+        }}
+        name="name"
+        type="text"
+        label="Input Name"
+        id="inputName"
+        variant="filled"
+        inputProps={{
+          maxLength: 20,
+        }}
+      />
+      <TextField
+        required
+        sx={{
+          backgroundColor: 'white',
+          borderRadius: '10px',
+        }}
+        name="phone"
+        type="tel"
+        id="inputPhone"
+        label="Input Phone"
+        variant="filled"
+        inputProps={{
+          maxLength: 15,
+        }}
+      />
+
+      <Button type="submit" variant="contained">
         Add contact
-      </button>
-    </form>
+      </Button>
+    </Box>
   );
 };
 
