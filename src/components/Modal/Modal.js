@@ -19,7 +19,7 @@ const Modal = ({ close, contact }) => {
       id: contact.id,
     };
     if (
-      checkName(changeContact.name) === false ||
+      checkName(changedContact.name) === false ||
       checkPhone(changedContact.number) === false
     ) {
       Notiflix.Notify.warning('Input fields did not pass validation');
