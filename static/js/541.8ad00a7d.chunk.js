@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkgoit_react_hw_08_phonebook=self.webpackChunkgoit_react_hw_08_phonebook||[]).push([[541],{1541:function(e,t,c){c.r(t),c.d(t,{default:function(){return r}});var n=c(4420),o=c(3101),a="HomePage_title__UFLA3",s="HomePage_titleUser__x+YBS",_=c(184),r=function(){var e=(0,n.v9)(o.Jt),t=(0,n.v9)(o.dy);return e?(0,_.jsxs)("h1",{className:"".concat(a," ").concat(s),children:["Welcome ",t.name]}):(0,_.jsx)("h1",{className:a,children:"Welcome Guest!"})}}}]);
+//# sourceMappingURL=541.8ad00a7d.chunk.js.map
